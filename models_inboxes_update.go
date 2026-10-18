@@ -3,10 +3,49 @@
 
 package sdk
 
-import "encoding/json"
+import (
+	"bytes"
+	"encoding/json"
+)
 
-// UpdateInboxOptions is a union type
-type UpdateInboxOptions = any
+// UpdateInboxOptions Provide at least one of `name` or `from_name`.
+type UpdateInboxOptions struct {
+	// Name New internal name for the inbox. Recipients do not see it. Between 1 and 64 characters after trimming.
+	Name *string `json:"name,omitempty"`
+	// FromName The name recipients see when mail is sent from this inbox. A plain name, not a `Name <email>` address. Max 78 characters. It cannot contain a colon, `<`, `>`, line breaks, or other control characters. An email address inside the name must be on a domain the team has verified for sending. An empty string removes it.
+	FromName *string `json:"from_name,omitempty"`
+}
+
+func (value *UpdateInboxOptions) UnmarshalJSON(data []byte) error {
+	type UpdateInboxOptionsAlias UpdateInboxOptions
+	var decoded UpdateInboxOptionsAlias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*value = UpdateInboxOptions(decoded)
+	var rawFields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &rawFields); err != nil {
+		return err
+	}
+	if value.Name != nil {
+		if err := ValidateLength("name", *value.Name, LengthOpts{Min: Ptr[int](1), Max: Ptr[int](64)}); err != nil {
+			return err
+		}
+	}
+	if value.FromName != nil {
+		if err := ValidateLength("from_name", *value.FromName, LengthOpts{Max: Ptr[int](78)}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// NewUpdateInboxOptions returns a validated UpdateInboxOptions built from named fields.
+// Optional fields may be left unset; a value that violates the schema is
+// reported as *SdkValidationError.
+func NewUpdateInboxOptions(fields UpdateInboxOptions) (*UpdateInboxOptions, error) {
+	return ConstructModel(fields)
+}
 
 // UpdateInboxResponseSuccess Typed representation of the `UpdateInboxResponseSuccess` API schema.
 type UpdateInboxResponseSuccess struct {
@@ -46,8 +85,65 @@ func NewUpdateInboxResponseSuccess(fields UpdateInboxResponseSuccess) (*UpdateIn
 	return ConstructModel(fields)
 }
 
-// UpdateInboxAgentOptions is a union type
-type UpdateInboxAgentOptions = any
+// UpdateInboxAgentOptions At least one of `instructions`, `tone`, or `enabled_actions` must be provided. Omitted fields keep their current value.
+type UpdateInboxAgentOptions struct {
+	// Instructions Instructions the agent follows when it handles the threads of the inbox. Max 4000 characters. Leading and trailing whitespace is trimmed, and the trimmed value must not be empty. Send null to clear the instructions.
+	Instructions *NullableValue[string] `json:"instructions,omitempty"`
+	// Tone The tone the agent writes in. Send null to clear the tone.
+	Tone *NullableValue[UpdateInboxAgentOptionsToneEnum] `json:"tone,omitempty"`
+	// EnabledActions The actions the agent can take. Replaces the whole set. Duplicates are removed. Send an empty array to disable all actions.
+	EnabledActions []UpdateInboxAgentOptionsEnabledActionsEnum `json:"enabled_actions,omitempty"`
+}
+
+func (value *UpdateInboxAgentOptions) UnmarshalJSON(data []byte) error {
+	type UpdateInboxAgentOptionsAlias UpdateInboxAgentOptions
+	var decoded UpdateInboxAgentOptionsAlias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*value = UpdateInboxAgentOptions(decoded)
+	var rawFields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &rawFields); err != nil {
+		return err
+	}
+	if raw, ok := rawFields["instructions"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		value.Instructions = &NullableValue[string]{}
+	}
+	if raw, ok := rawFields["tone"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		value.Tone = &NullableValue[UpdateInboxAgentOptionsToneEnum]{}
+	}
+	return nil
+}
+
+// NewUpdateInboxAgentOptions returns a validated UpdateInboxAgentOptions built from named fields.
+// Optional fields may be left unset; a value that violates the schema is
+// reported as *SdkValidationError.
+func NewUpdateInboxAgentOptions(fields UpdateInboxAgentOptions) (*UpdateInboxAgentOptions, error) {
+	return ConstructModel(fields)
+}
+
+// UpdateInboxAgentOptionsToneEnum The tone the agent writes in. Send null to clear the tone.
+type UpdateInboxAgentOptionsToneEnum string
+
+const (
+	UpdateInboxAgentOptionsToneEnumConciseProfessional  UpdateInboxAgentOptionsToneEnum = "concise_professional"
+	UpdateInboxAgentOptionsToneEnumConciseCasual        UpdateInboxAgentOptionsToneEnum = "concise_casual"
+	UpdateInboxAgentOptionsToneEnumExpandedProfessional UpdateInboxAgentOptionsToneEnum = "expanded_professional"
+	UpdateInboxAgentOptionsToneEnumExpandedCasual       UpdateInboxAgentOptionsToneEnum = "expanded_casual"
+)
+
+// UpdateInboxAgentOptionsEnabledActionsEnum Required enumerated value serialized in the `enabled_actions[]` wire field.
+type UpdateInboxAgentOptionsEnabledActionsEnum string
+
+const (
+	UpdateInboxAgentOptionsEnabledActionsEnumDraftReply    UpdateInboxAgentOptionsEnabledActionsEnum = "draft_reply"
+	UpdateInboxAgentOptionsEnabledActionsEnumForwardThread UpdateInboxAgentOptionsEnabledActionsEnum = "forward_thread"
+	UpdateInboxAgentOptionsEnabledActionsEnumAddLabels     UpdateInboxAgentOptionsEnabledActionsEnum = "add_labels"
+	UpdateInboxAgentOptionsEnabledActionsEnumAssignThread  UpdateInboxAgentOptionsEnabledActionsEnum = "assign_thread"
+	UpdateInboxAgentOptionsEnabledActionsEnumMarkAsSpam    UpdateInboxAgentOptionsEnabledActionsEnum = "mark_as_spam"
+	UpdateInboxAgentOptionsEnabledActionsEnumArchiveThread UpdateInboxAgentOptionsEnabledActionsEnum = "archive_thread"
+	UpdateInboxAgentOptionsEnabledActionsEnumDeleteThread  UpdateInboxAgentOptionsEnabledActionsEnum = "delete_thread"
+)
 
 // UpdateInboxAgentResponseSuccess Typed representation of the `UpdateInboxAgentResponseSuccess` API schema.
 type UpdateInboxAgentResponseSuccess struct {
@@ -164,8 +260,256 @@ func NewUpdateInboxLabelResponseSuccess(fields UpdateInboxLabelResponseSuccess) 
 	return ConstructModel(fields)
 }
 
-// UpdateInboxThreadOptions is a union type
-type UpdateInboxThreadOptions = any
+// UpdateInboxThreadOptions At least one of `read`, `folder`, `add_label_ids`, or `remove_label_ids` is required. A label ID cannot be both added and removed in the same request.
+type UpdateInboxThreadOptions struct {
+	// Read Marks every email in the thread read or unread.
+	Read *bool `json:"read,omitempty"`
+	// Folder Moves the thread to this folder. `sent` is assigned automatically and cannot be set.
+	Folder *UpdateInboxThreadOptionsFolderEnum `json:"folder,omitempty"`
+	// AddLabelIds Label IDs to apply to the thread. Between 1 and 10 IDs. A label ID that does not exist in the inbox returns a 404.
+	AddLabelIds []string `json:"add_label_ids,omitempty"`
+	// RemoveLabelIds Label IDs to remove from the thread. Between 1 and 10 IDs. The labels themselves are kept. A label ID that does not exist in the inbox returns a 404.
+	RemoveLabelIds []string `json:"remove_label_ids,omitempty"`
+}
 
-// UpdateInboxDraftOptions is a union type
-type UpdateInboxDraftOptions = any
+func (value *UpdateInboxThreadOptions) UnmarshalJSON(data []byte) error {
+	type UpdateInboxThreadOptionsAlias UpdateInboxThreadOptions
+	var decoded UpdateInboxThreadOptionsAlias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*value = UpdateInboxThreadOptions(decoded)
+	var rawFields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &rawFields); err != nil {
+		return err
+	}
+	if func() bool { _, ok := rawFields["add_label_ids"]; return ok }() {
+		if err := ValidateItems("add_label_ids", value.AddLabelIds, LengthOpts{Min: Ptr[int](1), Max: Ptr[int](10)}); err != nil {
+			return err
+		}
+	}
+	if func() bool { _, ok := rawFields["remove_label_ids"]; return ok }() {
+		if err := ValidateItems("remove_label_ids", value.RemoveLabelIds, LengthOpts{Min: Ptr[int](1), Max: Ptr[int](10)}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// NewUpdateInboxThreadOptions returns a validated UpdateInboxThreadOptions built from named fields.
+// Optional fields may be left unset; a value that violates the schema is
+// reported as *SdkValidationError.
+func NewUpdateInboxThreadOptions(fields UpdateInboxThreadOptions) (*UpdateInboxThreadOptions, error) {
+	return ConstructModel(fields)
+}
+
+// UpdateInboxThreadOptionsFolderEnum Moves the thread to this folder. `sent` is assigned automatically and cannot be set.
+type UpdateInboxThreadOptionsFolderEnum string
+
+const (
+	UpdateInboxThreadOptionsFolderEnumInbox   UpdateInboxThreadOptionsFolderEnum = "inbox"
+	UpdateInboxThreadOptionsFolderEnumArchive UpdateInboxThreadOptionsFolderEnum = "archive"
+	UpdateInboxThreadOptionsFolderEnumSpam    UpdateInboxThreadOptionsFolderEnum = "spam"
+	UpdateInboxThreadOptionsFolderEnumTrash   UpdateInboxThreadOptionsFolderEnum = "trash"
+)
+
+// UpdateInboxDraftOptions Send at least one of `to`, `cc`, `bcc`, `subject`, `text`, `html` or `attachments`. Omitted fields are left unchanged. Setting `text` or `html` replaces the whole body, so the body part you omit becomes `null`. The merged draft must contain at least one non-empty field, and its combined recipients cannot exceed 50.
+type UpdateInboxDraftOptions struct {
+	// To The recipients. For multiple addresses, send an array of strings. Each value can include a friendly name. Pass `null` to clear. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
+	To *NullableValue[UpdateInboxDraftOptionsTo] `json:"to,omitempty"`
+	// Cc The CC recipients. Pass `null` or `[]` to clear. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
+	Cc *NullableValue[UpdateInboxDraftOptionsCc] `json:"cc,omitempty"`
+	// Bcc The BCC recipients. Pass `null` or `[]` to clear. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
+	Bcc *NullableValue[UpdateInboxDraftOptionsBcc] `json:"bcc,omitempty"`
+	// Subject The subject. Max 2000 characters. Cannot be only whitespace or contain a line break. Pass `null` to clear.
+	Subject *NullableValue[string] `json:"subject,omitempty"`
+	// Html The HTML body. Pass `null` to clear.
+	Html *NullableValue[string] `json:"html,omitempty"`
+	// Text The plain text body. Pass `null` to clear.
+	Text *NullableValue[string] `json:"text,omitempty"`
+	// Attachments Files to store on the draft. Each one needs `content`, `filename` and `content_type`. A `path` without `content` returns a 422, and when both are sent, `path` is ignored. A `content_id` returns a 422. The files on a draft can total at most 25 MB. An empty file or a blocked file type returns a 422. Sending the field replaces every attachment on the draft. Send `[]` to remove them all. `null` also removes them all.
+	Attachments *NullableValue[[]InboxDraftAttachmentInput] `json:"attachments,omitempty"`
+}
+
+func (value *UpdateInboxDraftOptions) UnmarshalJSON(data []byte) error {
+	type UpdateInboxDraftOptionsAlias UpdateInboxDraftOptions
+	var decoded UpdateInboxDraftOptionsAlias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*value = UpdateInboxDraftOptions(decoded)
+	var rawFields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &rawFields); err != nil {
+		return err
+	}
+	if raw, ok := rawFields["to"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		value.To = &NullableValue[UpdateInboxDraftOptionsTo]{}
+	}
+	if raw, ok := rawFields["cc"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		value.Cc = &NullableValue[UpdateInboxDraftOptionsCc]{}
+	}
+	if raw, ok := rawFields["bcc"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		value.Bcc = &NullableValue[UpdateInboxDraftOptionsBcc]{}
+	}
+	if raw, ok := rawFields["subject"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		value.Subject = &NullableValue[string]{}
+	}
+	if raw, ok := rawFields["html"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		value.Html = &NullableValue[string]{}
+	}
+	if raw, ok := rawFields["text"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		value.Text = &NullableValue[string]{}
+	}
+	if raw, ok := rawFields["attachments"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		value.Attachments = &NullableValue[[]InboxDraftAttachmentInput]{}
+	}
+	return nil
+}
+
+// NewUpdateInboxDraftOptions returns a validated UpdateInboxDraftOptions built from named fields.
+// Optional fields may be left unset; a value that violates the schema is
+// reported as *SdkValidationError.
+func NewUpdateInboxDraftOptions(fields UpdateInboxDraftOptions) (*UpdateInboxDraftOptions, error) {
+	return ConstructModel(fields)
+}
+
+// UpdateInboxDraftOptionsTo represents a union type.
+type UpdateInboxDraftOptionsTo struct {
+	String       *string
+	ListOfString *[]string
+}
+
+func (u *UpdateInboxDraftOptionsTo) UnmarshalJSON(data []byte) error {
+	*u = UpdateInboxDraftOptionsTo{}
+	var refusal error
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		u.String = &s
+		return nil
+	}
+	var listofstring []string
+	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyUpdateInboxDraftOptionsToListOfString(listofstring) {
+		u.ListOfString = &listofstring
+		return nil
+	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
+		refusal = err
+	}
+	return refusal
+}
+
+func (u UpdateInboxDraftOptionsTo) MarshalJSON() ([]byte, error) {
+	if u.String != nil {
+		return json.Marshal(u.String)
+	}
+	if u.ListOfString != nil {
+		return json.Marshal(u.ListOfString)
+	}
+	return []byte("null"), nil
+}
+
+func isNonEmptyUpdateInboxDraftOptionsToListOfString(v []string) bool {
+	b, _ := json.Marshal(v)
+	return string(b) != "{}" && string(b) != "null"
+}
+
+// UnmarshalUpdateInboxDraftOptionsTo converts an untyped value to UpdateInboxDraftOptionsTo.
+func UnmarshalUpdateInboxDraftOptionsTo(v any) UpdateInboxDraftOptionsTo {
+	b, _ := json.Marshal(v)
+	var result UpdateInboxDraftOptionsTo
+	_ = json.Unmarshal(b, &result)
+	return result
+}
+
+// UpdateInboxDraftOptionsCc represents a union type.
+type UpdateInboxDraftOptionsCc struct {
+	String       *string
+	ListOfString *[]string
+}
+
+func (u *UpdateInboxDraftOptionsCc) UnmarshalJSON(data []byte) error {
+	*u = UpdateInboxDraftOptionsCc{}
+	var refusal error
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		u.String = &s
+		return nil
+	}
+	var listofstring []string
+	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyUpdateInboxDraftOptionsCcListOfString(listofstring) {
+		u.ListOfString = &listofstring
+		return nil
+	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
+		refusal = err
+	}
+	return refusal
+}
+
+func (u UpdateInboxDraftOptionsCc) MarshalJSON() ([]byte, error) {
+	if u.String != nil {
+		return json.Marshal(u.String)
+	}
+	if u.ListOfString != nil {
+		return json.Marshal(u.ListOfString)
+	}
+	return []byte("null"), nil
+}
+
+func isNonEmptyUpdateInboxDraftOptionsCcListOfString(v []string) bool {
+	b, _ := json.Marshal(v)
+	return string(b) != "{}" && string(b) != "null"
+}
+
+// UnmarshalUpdateInboxDraftOptionsCc converts an untyped value to UpdateInboxDraftOptionsCc.
+func UnmarshalUpdateInboxDraftOptionsCc(v any) UpdateInboxDraftOptionsCc {
+	b, _ := json.Marshal(v)
+	var result UpdateInboxDraftOptionsCc
+	_ = json.Unmarshal(b, &result)
+	return result
+}
+
+// UpdateInboxDraftOptionsBcc represents a union type.
+type UpdateInboxDraftOptionsBcc struct {
+	String       *string
+	ListOfString *[]string
+}
+
+func (u *UpdateInboxDraftOptionsBcc) UnmarshalJSON(data []byte) error {
+	*u = UpdateInboxDraftOptionsBcc{}
+	var refusal error
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		u.String = &s
+		return nil
+	}
+	var listofstring []string
+	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyUpdateInboxDraftOptionsBccListOfString(listofstring) {
+		u.ListOfString = &listofstring
+		return nil
+	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
+		refusal = err
+	}
+	return refusal
+}
+
+func (u UpdateInboxDraftOptionsBcc) MarshalJSON() ([]byte, error) {
+	if u.String != nil {
+		return json.Marshal(u.String)
+	}
+	if u.ListOfString != nil {
+		return json.Marshal(u.ListOfString)
+	}
+	return []byte("null"), nil
+}
+
+func isNonEmptyUpdateInboxDraftOptionsBccListOfString(v []string) bool {
+	b, _ := json.Marshal(v)
+	return string(b) != "{}" && string(b) != "null"
+}
+
+// UnmarshalUpdateInboxDraftOptionsBcc converts an untyped value to UpdateInboxDraftOptionsBcc.
+func UnmarshalUpdateInboxDraftOptionsBcc(v any) UpdateInboxDraftOptionsBcc {
+	b, _ := json.Marshal(v)
+	var result UpdateInboxDraftOptionsBcc
+	_ = json.Unmarshal(b, &result)
+	return result
+}

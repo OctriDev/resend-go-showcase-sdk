@@ -46,7 +46,8 @@ type EmailsSendParams struct {
 //	strings.
 //	html: The HTML version of the message.
 //	text: The plain text version of the message.
-//	template: Optional API value serialized in the `template` wire field.
+//	template: Use a published template to send the email. If provided, do not
+//	include html or text.
 //	headers: Custom headers to add to the email.
 //	scheduledAt: Schedule email to be sent later. The date should be in ISO 8601
 //	format.
