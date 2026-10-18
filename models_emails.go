@@ -23,7 +23,7 @@ type SendEmailRequest struct {
 	Html *string `json:"html,omitempty"`
 	// Text The plain text version of the message.
 	Text *string `json:"text,omitempty"`
-	// Template Optional API value serialized in the `template` wire field.
+	// Template Use a published template to send the email. If provided, do not include html or text.
 	Template *EmailTemplateInput `json:"template,omitempty"`
 	// Headers Custom headers to add to the email.
 	Headers map[string]any `json:"headers,omitempty"`
