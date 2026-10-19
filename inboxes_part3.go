@@ -55,6 +55,24 @@ func InboxesUpdateDraft(ctx context.Context, clientConfig ClientConfig, params I
 		return nil, err
 	}
 
+	if to != nil && to.Value != nil {
+		if err := ValidateItems("to", *to.Value, LengthOpts{Max: Ptr[int](50)}); err != nil {
+			return nil, err
+		}
+	}
+
+	if cc != nil && cc.Value != nil {
+		if err := ValidateItems("cc", *cc.Value, LengthOpts{Max: Ptr[int](50)}); err != nil {
+			return nil, err
+		}
+	}
+
+	if bcc != nil && bcc.Value != nil {
+		if err := ValidateItems("bcc", *bcc.Value, LengthOpts{Max: Ptr[int](50)}); err != nil {
+			return nil, err
+		}
+	}
+
 	if subject != nil && subject.Value != nil {
 		if err := ValidateLength("subject", string(*subject.Value), LengthOpts{Min: Ptr[int](1), Max: Ptr[int](2000)}); err != nil {
 			return nil, err
