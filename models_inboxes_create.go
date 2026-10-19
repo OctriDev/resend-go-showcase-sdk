@@ -179,11 +179,11 @@ func NewCreateInboxLabelResponseSuccess(fields CreateInboxLabelResponseSuccess) 
 // CreateInboxDraftOptions At least one of `to`, `cc`, `bcc`, `subject`, `text`, `html` or `attachments` must be non-empty. The combined recipients of `to`, `cc` and `bcc` cannot exceed 50. `thread_id` and `reply_to_email_id` must be sent together or not at all.
 type CreateInboxDraftOptions struct {
 	// To The recipients. For multiple addresses, send an array of strings. Each value can include a friendly name, for example `Ada Lovelace <ada@example.org>`. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
-	To *NullableValue[CreateInboxDraftOptionsTo] `json:"to,omitempty"`
+	To *NullableValue[[]string] `json:"to,omitempty"`
 	// Cc The CC recipients. For multiple addresses, send an array of strings. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
-	Cc *NullableValue[CreateInboxDraftOptionsCc] `json:"cc,omitempty"`
+	Cc *NullableValue[[]string] `json:"cc,omitempty"`
 	// Bcc The BCC recipients. For multiple addresses, send an array of strings. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
-	Bcc *NullableValue[CreateInboxDraftOptionsBcc] `json:"bcc,omitempty"`
+	Bcc *NullableValue[[]string] `json:"bcc,omitempty"`
 	// Subject The subject. Max 2000 characters. A string that is only whitespace, or that contains a line break, is rejected.
 	Subject *NullableValue[string] `json:"subject,omitempty"`
 	// Html The HTML body.
@@ -220,13 +220,13 @@ func (value *CreateInboxDraftOptions) UnmarshalJSON(data []byte) error {
 		}
 	}
 	if raw, ok := rawFields["to"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		value.To = &NullableValue[CreateInboxDraftOptionsTo]{}
+		value.To = &NullableValue[[]string]{}
 	}
 	if raw, ok := rawFields["cc"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		value.Cc = &NullableValue[CreateInboxDraftOptionsCc]{}
+		value.Cc = &NullableValue[[]string]{}
 	}
 	if raw, ok := rawFields["bcc"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		value.Bcc = &NullableValue[CreateInboxDraftOptionsBcc]{}
+		value.Bcc = &NullableValue[[]string]{}
 	}
 	if raw, ok := rawFields["subject"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
 		value.Subject = &NullableValue[string]{}
@@ -248,147 +248,6 @@ func (value *CreateInboxDraftOptions) UnmarshalJSON(data []byte) error {
 // reported as *SdkValidationError.
 func NewCreateInboxDraftOptions(fields CreateInboxDraftOptions) (*CreateInboxDraftOptions, error) {
 	return ConstructModel(fields)
-}
-
-// CreateInboxDraftOptionsTo represents a union type.
-type CreateInboxDraftOptionsTo struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *CreateInboxDraftOptionsTo) UnmarshalJSON(data []byte) error {
-	*u = CreateInboxDraftOptionsTo{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyCreateInboxDraftOptionsToListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u CreateInboxDraftOptionsTo) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptyCreateInboxDraftOptionsToListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalCreateInboxDraftOptionsTo converts an untyped value to CreateInboxDraftOptionsTo.
-func UnmarshalCreateInboxDraftOptionsTo(v any) CreateInboxDraftOptionsTo {
-	b, _ := json.Marshal(v)
-	var result CreateInboxDraftOptionsTo
-	_ = json.Unmarshal(b, &result)
-	return result
-}
-
-// CreateInboxDraftOptionsCc represents a union type.
-type CreateInboxDraftOptionsCc struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *CreateInboxDraftOptionsCc) UnmarshalJSON(data []byte) error {
-	*u = CreateInboxDraftOptionsCc{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyCreateInboxDraftOptionsCcListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u CreateInboxDraftOptionsCc) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptyCreateInboxDraftOptionsCcListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalCreateInboxDraftOptionsCc converts an untyped value to CreateInboxDraftOptionsCc.
-func UnmarshalCreateInboxDraftOptionsCc(v any) CreateInboxDraftOptionsCc {
-	b, _ := json.Marshal(v)
-	var result CreateInboxDraftOptionsCc
-	_ = json.Unmarshal(b, &result)
-	return result
-}
-
-// CreateInboxDraftOptionsBcc represents a union type.
-type CreateInboxDraftOptionsBcc struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *CreateInboxDraftOptionsBcc) UnmarshalJSON(data []byte) error {
-	*u = CreateInboxDraftOptionsBcc{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyCreateInboxDraftOptionsBccListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u CreateInboxDraftOptionsBcc) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptyCreateInboxDraftOptionsBccListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalCreateInboxDraftOptionsBcc converts an untyped value to CreateInboxDraftOptionsBcc.
-func UnmarshalCreateInboxDraftOptionsBcc(v any) CreateInboxDraftOptionsBcc {
-	b, _ := json.Marshal(v)
-	var result CreateInboxDraftOptionsBcc
-	_ = json.Unmarshal(b, &result)
-	return result
 }
 
 // CreateInboxDraftResponseSuccess Typed representation of the `CreateInboxDraftResponseSuccess` API schema.

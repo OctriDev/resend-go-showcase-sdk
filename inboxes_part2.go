@@ -213,8 +213,8 @@ type InboxesReplyThreadEmailParams struct {
 	ThreadId       string
 	EmailId        string
 	IdempotencyKey *string
-	Cc             *any
-	Bcc            *any
+	Cc             *NullableValue[[]string]
+	Bcc            *NullableValue[[]string]
 	Html           *string
 	Text           *string
 	Subject        *string
@@ -307,6 +307,18 @@ func InboxesReplyThreadEmail(ctx context.Context, clientConfig ClientConfig, par
 		}
 	}
 
+	if cc != nil && cc.Value != nil {
+		if err := ValidateItems("cc", *cc.Value, LengthOpts{Max: Ptr[int](49)}); err != nil {
+			return nil, err
+		}
+	}
+
+	if bcc != nil && bcc.Value != nil {
+		if err := ValidateItems("bcc", *bcc.Value, LengthOpts{Max: Ptr[int](49)}); err != nil {
+			return nil, err
+		}
+	}
+
 	if subject != nil {
 		if err := ValidateLength("subject", *subject, LengthOpts{Min: Ptr[int](1), Max: Ptr[int](2000)}); err != nil {
 			return nil, err
@@ -340,10 +352,10 @@ type InboxesForwardThreadEmailParams struct {
 	InboxId        string
 	ThreadId       string
 	EmailId        string
-	To             any
+	To             []string
 	IdempotencyKey *string
-	Cc             *any
-	Bcc            *any
+	Cc             *NullableValue[[]string]
+	Bcc            *NullableValue[[]string]
 	Html           *string
 	Text           *string
 	Subject        *string
@@ -425,8 +437,24 @@ func InboxesForwardThreadEmail(ctx context.Context, clientConfig ClientConfig, p
 		return nil, err
 	}
 
+	if err := ValidateItems("to", to, LengthOpts{Min: Ptr[int](1), Max: Ptr[int](50)}); err != nil {
+		return nil, err
+	}
+
 	if idempotencyKey != nil {
 		if err := ValidateLength("Idempotency-Key", *idempotencyKey, LengthOpts{Min: Ptr[int](1), Max: Ptr[int](256)}); err != nil {
+			return nil, err
+		}
+	}
+
+	if cc != nil && cc.Value != nil {
+		if err := ValidateItems("cc", *cc.Value, LengthOpts{Max: Ptr[int](50)}); err != nil {
+			return nil, err
+		}
+	}
+
+	if bcc != nil && bcc.Value != nil {
+		if err := ValidateItems("bcc", *bcc.Value, LengthOpts{Max: Ptr[int](50)}); err != nil {
 			return nil, err
 		}
 	}
@@ -511,9 +539,9 @@ func InboxesListDrafts(ctx context.Context, clientConfig ClientConfig, params In
 type InboxesCreateDraftParams struct {
 	InboxId        string
 	IdempotencyKey *string
-	To             *any
-	Cc             *any
-	Bcc            *any
+	To             *NullableValue[[]string]
+	Cc             *NullableValue[[]string]
+	Bcc            *NullableValue[[]string]
 	Subject        *NullableValue[string]
 	Html           *NullableValue[string]
 	Text           *NullableValue[string]
@@ -578,6 +606,24 @@ func InboxesCreateDraft(ctx context.Context, clientConfig ClientConfig, params I
 
 	if idempotencyKey != nil {
 		if err := ValidateLength("Idempotency-Key", *idempotencyKey, LengthOpts{Min: Ptr[int](1), Max: Ptr[int](256)}); err != nil {
+			return nil, err
+		}
+	}
+
+	if to != nil && to.Value != nil {
+		if err := ValidateItems("to", *to.Value, LengthOpts{Max: Ptr[int](50)}); err != nil {
+			return nil, err
+		}
+	}
+
+	if cc != nil && cc.Value != nil {
+		if err := ValidateItems("cc", *cc.Value, LengthOpts{Max: Ptr[int](50)}); err != nil {
+			return nil, err
+		}
+	}
+
+	if bcc != nil && bcc.Value != nil {
+		if err := ValidateItems("bcc", *bcc.Value, LengthOpts{Max: Ptr[int](50)}); err != nil {
 			return nil, err
 		}
 	}
@@ -660,9 +706,9 @@ func InboxesGetDraft(ctx context.Context, clientConfig ClientConfig, params Inbo
 type InboxesUpdateDraftParams struct {
 	InboxId     string
 	DraftId     string
-	To          *any
-	Cc          *any
-	Bcc         *any
+	To          *NullableValue[[]string]
+	Cc          *NullableValue[[]string]
+	Bcc         *NullableValue[[]string]
 	Subject     *NullableValue[string]
 	Html        *NullableValue[string]
 	Text        *NullableValue[string]

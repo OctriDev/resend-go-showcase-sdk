@@ -11,9 +11,9 @@ import (
 // ReplyInboxThreadEmailOptions At least one of `html` or `text` must contain more than whitespace.
 type ReplyInboxThreadEmailOptions struct {
 	// Cc CC recipient email address. For multiple addresses, send as an array of strings. Without `reply_all`, the reply copies only these addresses. With `reply_all`, these addresses are merged with the copied recipients, without duplicates. `cc` and `bcc` combined must be fewer than 50 addresses. After the `to` recipients are added, the reply cannot exceed 50 recipients. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
-	Cc *NullableValue[ReplyInboxThreadEmailOptionsCc] `json:"cc,omitempty"`
+	Cc *NullableValue[[]string] `json:"cc,omitempty"`
 	// Bcc BCC recipient email address. For multiple addresses, send as an array of strings. BCC recipients of the original message are never copied. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
-	Bcc *NullableValue[ReplyInboxThreadEmailOptionsBcc] `json:"bcc,omitempty"`
+	Bcc *NullableValue[[]string] `json:"bcc,omitempty"`
 	// Html The HTML body of the reply.
 	Html *string `json:"html,omitempty"`
 	// Text The plain-text body of the reply.
@@ -45,10 +45,10 @@ func (value *ReplyInboxThreadEmailOptions) UnmarshalJSON(data []byte) error {
 		}
 	}
 	if raw, ok := rawFields["cc"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		value.Cc = &NullableValue[ReplyInboxThreadEmailOptionsCc]{}
+		value.Cc = &NullableValue[[]string]{}
 	}
 	if raw, ok := rawFields["bcc"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		value.Bcc = &NullableValue[ReplyInboxThreadEmailOptionsBcc]{}
+		value.Bcc = &NullableValue[[]string]{}
 	}
 	if raw, ok := rawFields["attachments"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
 		value.Attachments = &NullableValue[[]Attachment]{}
@@ -64,100 +64,6 @@ func (value *ReplyInboxThreadEmailOptions) UnmarshalJSON(data []byte) error {
 // reported as *SdkValidationError.
 func NewReplyInboxThreadEmailOptions(fields ReplyInboxThreadEmailOptions) (*ReplyInboxThreadEmailOptions, error) {
 	return ConstructModel(fields)
-}
-
-// ReplyInboxThreadEmailOptionsCc represents a union type.
-type ReplyInboxThreadEmailOptionsCc struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *ReplyInboxThreadEmailOptionsCc) UnmarshalJSON(data []byte) error {
-	*u = ReplyInboxThreadEmailOptionsCc{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyReplyInboxThreadEmailOptionsCcListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u ReplyInboxThreadEmailOptionsCc) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptyReplyInboxThreadEmailOptionsCcListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalReplyInboxThreadEmailOptionsCc converts an untyped value to ReplyInboxThreadEmailOptionsCc.
-func UnmarshalReplyInboxThreadEmailOptionsCc(v any) ReplyInboxThreadEmailOptionsCc {
-	b, _ := json.Marshal(v)
-	var result ReplyInboxThreadEmailOptionsCc
-	_ = json.Unmarshal(b, &result)
-	return result
-}
-
-// ReplyInboxThreadEmailOptionsBcc represents a union type.
-type ReplyInboxThreadEmailOptionsBcc struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *ReplyInboxThreadEmailOptionsBcc) UnmarshalJSON(data []byte) error {
-	*u = ReplyInboxThreadEmailOptionsBcc{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyReplyInboxThreadEmailOptionsBccListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u ReplyInboxThreadEmailOptionsBcc) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptyReplyInboxThreadEmailOptionsBccListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalReplyInboxThreadEmailOptionsBcc converts an untyped value to ReplyInboxThreadEmailOptionsBcc.
-func UnmarshalReplyInboxThreadEmailOptionsBcc(v any) ReplyInboxThreadEmailOptionsBcc {
-	b, _ := json.Marshal(v)
-	var result ReplyInboxThreadEmailOptionsBcc
-	_ = json.Unmarshal(b, &result)
-	return result
 }
 
 // ReplyInboxThreadEmailResponseSuccess Typed representation of the `ReplyInboxThreadEmailResponseSuccess` API schema.

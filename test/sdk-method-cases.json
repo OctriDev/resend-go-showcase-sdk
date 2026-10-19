@@ -648,7 +648,7 @@
       "owner": null,
       "arguments": {
         "SegmentId": "segment-1",
-        "From": "from",
+        "From": "user@example.com",
         "Subject": "subject",
         "Name": "Example Name",
         "AudienceId": "audience-1",
@@ -929,7 +929,7 @@
         "Name": "Example Name",
         "AudienceId": "audience-1",
         "SegmentId": "segment-1",
-        "From": "from",
+        "From": "user@example.com",
         "Subject": "subject",
         "ReplyTo": [
           "reply_to"
@@ -2316,13 +2316,21 @@
       "mode": "normal",
       "owner": null,
       "arguments": {
-        "From": "from",
-        "To": "to",
+        "From": "user@example.com",
+        "To": [
+          "to"
+        ],
         "Subject": "subject",
         "IdempotencyKey": "Idempotency-Key",
-        "Bcc": "bcc",
-        "Cc": "cc",
-        "ReplyTo": "reply_to",
+        "Bcc": [
+          "bcc"
+        ],
+        "Cc": [
+          "cc"
+        ],
+        "ReplyTo": [
+          "reply_to"
+        ],
         "Html": "html",
         "Text": "text",
         "Template": {
@@ -2406,12 +2414,20 @@
         "IdempotencyKey": "Idempotency-Key",
         "Body": [
           {
-            "from": "from",
-            "to": "to",
+            "from": "user@example.com",
+            "to": [
+              "to"
+            ],
             "subject": "subject",
-            "bcc": "bcc",
-            "cc": "cc",
-            "reply_to": "reply_to",
+            "bcc": [
+              "bcc"
+            ],
+            "cc": [
+              "cc"
+            ],
+            "reply_to": [
+              "reply_to"
+            ],
             "html": "html",
             "text": "text",
             "template": {
@@ -2941,8 +2957,12 @@
         "To": [
           "ada@example.org"
         ],
-        "Cc": "cc",
-        "Bcc": "bcc",
+        "Cc": [
+          "cc"
+        ],
+        "Bcc": [
+          "bcc"
+        ],
         "Subject": "Refund for order 1041",
         "Html": "<p>Refund issued for order 1041.</p>",
         "Text": "Refund issued for order 1041.",
@@ -4028,8 +4048,12 @@
         "To": [
           "ada@example.org"
         ],
-        "Cc": "cc",
-        "Bcc": "bcc",
+        "Cc": [
+          "cc"
+        ],
+        "Bcc": [
+          "bcc"
+        ],
         "Subject": "Refund issued for order 1041",
         "Html": "html",
         "Text": "text",
@@ -4938,7 +4962,7 @@
         "Name": "Example Name",
         "Html": "html",
         "Alias": "alias",
-        "From": "from",
+        "From": "user@example.com",
         "Subject": "subject",
         "ReplyTo": [
           "reply_to"
@@ -5034,7 +5058,7 @@
           "current_version_id": "current_version-1",
           "name": "Example Name",
           "alias": "alias",
-          "from": "from",
+          "from": "user@example.com",
           "subject": "subject",
           "reply_to": [
             "reply_to"
@@ -5172,7 +5196,7 @@
         "Id": "id-1",
         "Name": "Example Name",
         "Alias": "alias",
-        "From": "from",
+        "From": "user@example.com",
         "Subject": "subject",
         "ReplyTo": [
           "reply_to"

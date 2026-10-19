@@ -10,12 +10,12 @@ import (
 
 type EmailsSendParams struct {
 	From           string
-	To             any
+	To             []string
 	Subject        string
 	IdempotencyKey *string
-	Bcc            *any
-	Cc             *any
-	ReplyTo        *any
+	Bcc            *[]string
+	Cc             *[]string
+	ReplyTo        *[]string
 	Html           *string
 	Text           *string
 	Template       *EmailTemplateInput
@@ -74,6 +74,10 @@ func EmailsSend(ctx context.Context, clientConfig ClientConfig, params EmailsSen
 	attachments := params.Attachments
 	tags := params.Tags
 	topicId := params.TopicId
+
+	if err := ValidateItems("to", to, LengthOpts{Min: Ptr[int](1), Max: Ptr[int](50)}); err != nil {
+		return nil, err
+	}
 
 	if idempotencyKey != nil {
 		if err := ValidateLength("Idempotency-Key", *idempotencyKey, LengthOpts{Max: Ptr[int](256)}); err != nil {
