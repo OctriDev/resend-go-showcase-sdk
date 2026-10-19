@@ -14,13 +14,14 @@ go get github.com/OctriDev/resend-go-showcase-sdk
 
 ## Quickstart
 
-The example calls `client.Domains.Get` (GET `/domains/{domain_id}`) with example values for its required arguments.
+The example calls `client.Emails.Send` (POST `/emails`) with example values for its required arguments.
 
 ```go
 package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -35,11 +36,15 @@ func main() {
 		Auth: &sdk.ClientAuthConfig{BearerAuth: os.Getenv("API_TOKEN")},
 	}
 	client := sdk.NewResend(config)
-	result, err := client.Domains.Get(ctx, sdk.DomainsGetParams{DomainId: "domain-1"})
+	result, err := client.Emails.Send(ctx, sdk.EmailsSendParams{From: "user@example.com", To: []string{"user@example.com"}, Subject: "subject"})
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%d records\n", len(result.Records))
+	out, err := json.Marshal(result)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(out))
 }
 ```
 

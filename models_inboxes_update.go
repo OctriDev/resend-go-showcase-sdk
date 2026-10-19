@@ -316,11 +316,11 @@ const (
 // UpdateInboxDraftOptions Send at least one of `to`, `cc`, `bcc`, `subject`, `text`, `html` or `attachments`. Omitted fields are left unchanged. Setting `text` or `html` replaces the whole body, so the body part you omit becomes `null`. The merged draft must contain at least one non-empty field, and its combined recipients cannot exceed 50.
 type UpdateInboxDraftOptions struct {
 	// To The recipients. For multiple addresses, send an array of strings. Each value can include a friendly name. Pass `null` to clear. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
-	To *NullableValue[UpdateInboxDraftOptionsTo] `json:"to,omitempty"`
+	To *NullableValue[[]string] `json:"to,omitempty"`
 	// Cc The CC recipients. Pass `null` or `[]` to clear. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
-	Cc *NullableValue[UpdateInboxDraftOptionsCc] `json:"cc,omitempty"`
+	Cc *NullableValue[[]string] `json:"cc,omitempty"`
 	// Bcc The BCC recipients. Pass `null` or `[]` to clear. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
-	Bcc *NullableValue[UpdateInboxDraftOptionsBcc] `json:"bcc,omitempty"`
+	Bcc *NullableValue[[]string] `json:"bcc,omitempty"`
 	// Subject The subject. Max 2000 characters. Cannot be only whitespace or contain a line break. Pass `null` to clear.
 	Subject *NullableValue[string] `json:"subject,omitempty"`
 	// Html The HTML body. Pass `null` to clear.
@@ -343,13 +343,13 @@ func (value *UpdateInboxDraftOptions) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if raw, ok := rawFields["to"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		value.To = &NullableValue[UpdateInboxDraftOptionsTo]{}
+		value.To = &NullableValue[[]string]{}
 	}
 	if raw, ok := rawFields["cc"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		value.Cc = &NullableValue[UpdateInboxDraftOptionsCc]{}
+		value.Cc = &NullableValue[[]string]{}
 	}
 	if raw, ok := rawFields["bcc"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		value.Bcc = &NullableValue[UpdateInboxDraftOptionsBcc]{}
+		value.Bcc = &NullableValue[[]string]{}
 	}
 	if raw, ok := rawFields["subject"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
 		value.Subject = &NullableValue[string]{}
@@ -371,145 +371,4 @@ func (value *UpdateInboxDraftOptions) UnmarshalJSON(data []byte) error {
 // reported as *SdkValidationError.
 func NewUpdateInboxDraftOptions(fields UpdateInboxDraftOptions) (*UpdateInboxDraftOptions, error) {
 	return ConstructModel(fields)
-}
-
-// UpdateInboxDraftOptionsTo represents a union type.
-type UpdateInboxDraftOptionsTo struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *UpdateInboxDraftOptionsTo) UnmarshalJSON(data []byte) error {
-	*u = UpdateInboxDraftOptionsTo{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyUpdateInboxDraftOptionsToListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u UpdateInboxDraftOptionsTo) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptyUpdateInboxDraftOptionsToListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalUpdateInboxDraftOptionsTo converts an untyped value to UpdateInboxDraftOptionsTo.
-func UnmarshalUpdateInboxDraftOptionsTo(v any) UpdateInboxDraftOptionsTo {
-	b, _ := json.Marshal(v)
-	var result UpdateInboxDraftOptionsTo
-	_ = json.Unmarshal(b, &result)
-	return result
-}
-
-// UpdateInboxDraftOptionsCc represents a union type.
-type UpdateInboxDraftOptionsCc struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *UpdateInboxDraftOptionsCc) UnmarshalJSON(data []byte) error {
-	*u = UpdateInboxDraftOptionsCc{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyUpdateInboxDraftOptionsCcListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u UpdateInboxDraftOptionsCc) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptyUpdateInboxDraftOptionsCcListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalUpdateInboxDraftOptionsCc converts an untyped value to UpdateInboxDraftOptionsCc.
-func UnmarshalUpdateInboxDraftOptionsCc(v any) UpdateInboxDraftOptionsCc {
-	b, _ := json.Marshal(v)
-	var result UpdateInboxDraftOptionsCc
-	_ = json.Unmarshal(b, &result)
-	return result
-}
-
-// UpdateInboxDraftOptionsBcc represents a union type.
-type UpdateInboxDraftOptionsBcc struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *UpdateInboxDraftOptionsBcc) UnmarshalJSON(data []byte) error {
-	*u = UpdateInboxDraftOptionsBcc{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyUpdateInboxDraftOptionsBccListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u UpdateInboxDraftOptionsBcc) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptyUpdateInboxDraftOptionsBccListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalUpdateInboxDraftOptionsBcc converts an untyped value to UpdateInboxDraftOptionsBcc.
-func UnmarshalUpdateInboxDraftOptionsBcc(v any) UpdateInboxDraftOptionsBcc {
-	b, _ := json.Marshal(v)
-	var result UpdateInboxDraftOptionsBcc
-	_ = json.Unmarshal(b, &result)
-	return result
 }

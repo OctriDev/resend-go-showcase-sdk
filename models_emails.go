@@ -10,15 +10,15 @@ type SendEmailRequest struct {
 	// From Sender email address. To include a friendly name, use the format "Your Name <sender@domain.com>".
 	From string `json:"from"`
 	// To Recipient email address. For multiple addresses, send as an array of strings. Max 50.
-	To SendEmailRequestTo `json:"to"`
+	To []string `json:"to"`
 	// Subject Email subject.
 	Subject string `json:"subject"`
 	// Bcc Bcc recipient email address. For multiple addresses, send as an array of strings.
-	Bcc *SendEmailRequestBcc `json:"bcc,omitempty"`
+	Bcc []string `json:"bcc,omitempty"`
 	// Cc Cc recipient email address. For multiple addresses, send as an array of strings.
-	Cc *SendEmailRequestCc `json:"cc,omitempty"`
+	Cc []string `json:"cc,omitempty"`
 	// ReplyTo Reply-to email address. For multiple addresses, send as an array of strings.
-	ReplyTo *SendEmailRequestReplyTo `json:"reply_to,omitempty"`
+	ReplyTo []string `json:"reply_to,omitempty"`
 	// Html The HTML version of the message.
 	Html *string `json:"html,omitempty"`
 	// Text The plain text version of the message.
@@ -54,6 +54,9 @@ func (value *SendEmailRequest) UnmarshalJSON(data []byte) error {
 	if err := ValidateNotNull(rawFields, []string{"from", "to", "subject"}); err != nil {
 		return err
 	}
+	if err := ValidateItems("to", value.To, LengthOpts{Min: Ptr[int](1), Max: Ptr[int](50)}); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -62,194 +65,6 @@ func (value *SendEmailRequest) UnmarshalJSON(data []byte) error {
 // reported as *SdkValidationError.
 func NewSendEmailRequest(fields SendEmailRequest) (*SendEmailRequest, error) {
 	return ConstructModel(fields)
-}
-
-// SendEmailRequestTo represents a union type.
-type SendEmailRequestTo struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *SendEmailRequestTo) UnmarshalJSON(data []byte) error {
-	*u = SendEmailRequestTo{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptySendEmailRequestToListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u SendEmailRequestTo) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptySendEmailRequestToListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalSendEmailRequestTo converts an untyped value to SendEmailRequestTo.
-func UnmarshalSendEmailRequestTo(v any) SendEmailRequestTo {
-	b, _ := json.Marshal(v)
-	var result SendEmailRequestTo
-	_ = json.Unmarshal(b, &result)
-	return result
-}
-
-// SendEmailRequestBcc represents a union type.
-type SendEmailRequestBcc struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *SendEmailRequestBcc) UnmarshalJSON(data []byte) error {
-	*u = SendEmailRequestBcc{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptySendEmailRequestBccListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u SendEmailRequestBcc) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptySendEmailRequestBccListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalSendEmailRequestBcc converts an untyped value to SendEmailRequestBcc.
-func UnmarshalSendEmailRequestBcc(v any) SendEmailRequestBcc {
-	b, _ := json.Marshal(v)
-	var result SendEmailRequestBcc
-	_ = json.Unmarshal(b, &result)
-	return result
-}
-
-// SendEmailRequestCc represents a union type.
-type SendEmailRequestCc struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *SendEmailRequestCc) UnmarshalJSON(data []byte) error {
-	*u = SendEmailRequestCc{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptySendEmailRequestCcListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u SendEmailRequestCc) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptySendEmailRequestCcListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalSendEmailRequestCc converts an untyped value to SendEmailRequestCc.
-func UnmarshalSendEmailRequestCc(v any) SendEmailRequestCc {
-	b, _ := json.Marshal(v)
-	var result SendEmailRequestCc
-	_ = json.Unmarshal(b, &result)
-	return result
-}
-
-// SendEmailRequestReplyTo represents a union type.
-type SendEmailRequestReplyTo struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *SendEmailRequestReplyTo) UnmarshalJSON(data []byte) error {
-	*u = SendEmailRequestReplyTo{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptySendEmailRequestReplyToListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u SendEmailRequestReplyTo) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptySendEmailRequestReplyToListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalSendEmailRequestReplyTo converts an untyped value to SendEmailRequestReplyTo.
-func UnmarshalSendEmailRequestReplyTo(v any) SendEmailRequestReplyTo {
-	b, _ := json.Marshal(v)
-	var result SendEmailRequestReplyTo
-	_ = json.Unmarshal(b, &result)
-	return result
 }
 
 // Tag Typed representation of the `Tag` API schema.

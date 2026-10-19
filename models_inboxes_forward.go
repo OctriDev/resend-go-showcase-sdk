@@ -11,11 +11,11 @@ import (
 // ForwardInboxThreadEmailOptions Typed representation of the `ForwardInboxThreadEmailOptions` API schema.
 type ForwardInboxThreadEmailOptions struct {
 	// To Recipient email address. For multiple addresses, send as an array of strings. Must name at least one address. `to`, `cc` and `bcc` combined cannot exceed 50 recipients. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
-	To ForwardInboxThreadEmailOptionsTo `json:"to"`
+	To []string `json:"to"`
 	// Cc CC recipient email address. For multiple addresses, send as an array of strings. Counts toward the 50-recipient limit. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
-	Cc *NullableValue[ForwardInboxThreadEmailOptionsCc] `json:"cc,omitempty"`
+	Cc *NullableValue[[]string] `json:"cc,omitempty"`
 	// Bcc BCC recipient email address. For multiple addresses, send as an array of strings. Counts toward the 50-recipient limit. Each address is `email@example.com` or `Name <email@example.com>`. An address that is not valid returns a 422.
-	Bcc *NullableValue[ForwardInboxThreadEmailOptionsBcc] `json:"bcc,omitempty"`
+	Bcc *NullableValue[[]string] `json:"bcc,omitempty"`
 	// Html An HTML note sent above the quoted original.
 	Html *string `json:"html,omitempty"`
 	// Text A plain-text note sent above the quoted original.
@@ -45,16 +45,19 @@ func (value *ForwardInboxThreadEmailOptions) UnmarshalJSON(data []byte) error {
 	if err := ValidateNotNull(rawFields, []string{"to"}); err != nil {
 		return err
 	}
+	if err := ValidateItems("to", value.To, LengthOpts{Min: Ptr[int](1), Max: Ptr[int](50)}); err != nil {
+		return err
+	}
 	if value.Subject != nil {
 		if err := ValidateLength("subject", *value.Subject, LengthOpts{Min: Ptr[int](1), Max: Ptr[int](2000)}); err != nil {
 			return err
 		}
 	}
 	if raw, ok := rawFields["cc"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		value.Cc = &NullableValue[ForwardInboxThreadEmailOptionsCc]{}
+		value.Cc = &NullableValue[[]string]{}
 	}
 	if raw, ok := rawFields["bcc"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		value.Bcc = &NullableValue[ForwardInboxThreadEmailOptionsBcc]{}
+		value.Bcc = &NullableValue[[]string]{}
 	}
 	if raw, ok := rawFields["attachments"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
 		value.Attachments = &NullableValue[[]Attachment]{}
@@ -70,147 +73,6 @@ func (value *ForwardInboxThreadEmailOptions) UnmarshalJSON(data []byte) error {
 // reported as *SdkValidationError.
 func NewForwardInboxThreadEmailOptions(fields ForwardInboxThreadEmailOptions) (*ForwardInboxThreadEmailOptions, error) {
 	return ConstructModel(fields)
-}
-
-// ForwardInboxThreadEmailOptionsTo represents a union type.
-type ForwardInboxThreadEmailOptionsTo struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *ForwardInboxThreadEmailOptionsTo) UnmarshalJSON(data []byte) error {
-	*u = ForwardInboxThreadEmailOptionsTo{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyForwardInboxThreadEmailOptionsToListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u ForwardInboxThreadEmailOptionsTo) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptyForwardInboxThreadEmailOptionsToListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalForwardInboxThreadEmailOptionsTo converts an untyped value to ForwardInboxThreadEmailOptionsTo.
-func UnmarshalForwardInboxThreadEmailOptionsTo(v any) ForwardInboxThreadEmailOptionsTo {
-	b, _ := json.Marshal(v)
-	var result ForwardInboxThreadEmailOptionsTo
-	_ = json.Unmarshal(b, &result)
-	return result
-}
-
-// ForwardInboxThreadEmailOptionsCc represents a union type.
-type ForwardInboxThreadEmailOptionsCc struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *ForwardInboxThreadEmailOptionsCc) UnmarshalJSON(data []byte) error {
-	*u = ForwardInboxThreadEmailOptionsCc{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyForwardInboxThreadEmailOptionsCcListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u ForwardInboxThreadEmailOptionsCc) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptyForwardInboxThreadEmailOptionsCcListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalForwardInboxThreadEmailOptionsCc converts an untyped value to ForwardInboxThreadEmailOptionsCc.
-func UnmarshalForwardInboxThreadEmailOptionsCc(v any) ForwardInboxThreadEmailOptionsCc {
-	b, _ := json.Marshal(v)
-	var result ForwardInboxThreadEmailOptionsCc
-	_ = json.Unmarshal(b, &result)
-	return result
-}
-
-// ForwardInboxThreadEmailOptionsBcc represents a union type.
-type ForwardInboxThreadEmailOptionsBcc struct {
-	String       *string
-	ListOfString *[]string
-}
-
-func (u *ForwardInboxThreadEmailOptionsBcc) UnmarshalJSON(data []byte) error {
-	*u = ForwardInboxThreadEmailOptionsBcc{}
-	var refusal error
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		u.String = &s
-		return nil
-	}
-	var listofstring []string
-	if err := json.Unmarshal(data, &listofstring); err == nil && isNonEmptyForwardInboxThreadEmailOptionsBccListOfString(listofstring) {
-		u.ListOfString = &listofstring
-		return nil
-	} else if _, refused := err.(*SdkValidationError); refused && refusal == nil {
-		refusal = err
-	}
-	return refusal
-}
-
-func (u ForwardInboxThreadEmailOptionsBcc) MarshalJSON() ([]byte, error) {
-	if u.String != nil {
-		return json.Marshal(u.String)
-	}
-	if u.ListOfString != nil {
-		return json.Marshal(u.ListOfString)
-	}
-	return []byte("null"), nil
-}
-
-func isNonEmptyForwardInboxThreadEmailOptionsBccListOfString(v []string) bool {
-	b, _ := json.Marshal(v)
-	return string(b) != "{}" && string(b) != "null"
-}
-
-// UnmarshalForwardInboxThreadEmailOptionsBcc converts an untyped value to ForwardInboxThreadEmailOptionsBcc.
-func UnmarshalForwardInboxThreadEmailOptionsBcc(v any) ForwardInboxThreadEmailOptionsBcc {
-	b, _ := json.Marshal(v)
-	var result ForwardInboxThreadEmailOptionsBcc
-	_ = json.Unmarshal(b, &result)
-	return result
 }
 
 // ForwardInboxThreadEmailResponseSuccess Typed representation of the `ForwardInboxThreadEmailResponseSuccess` API schema.
