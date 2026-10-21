@@ -425,8 +425,8 @@ func (sdk *OauthNamespace) ListGrants(ctx context.Context, params ListGrantsPara
 // Parameters:
 //
 //	oauthGrantId: The OAuth grant ID.
-func (sdk *OauthNamespace) RevokeGrant(ctx context.Context, params RevokeGrantParams, opts ...RequestOption) (*RevokeOAuthGrantResponse, error) {
-	return RevokeGrant(ctx, sdk.config, params, opts...)
+func (sdk *OauthNamespace) RevokeGrant(ctx context.Context, params RevokeOauthGrantParams, opts ...RequestOption) (*RevokeOAuthGrantResponse, error) {
+	return RevokeOauthGrant(ctx, sdk.config, params, opts...)
 }
 
 type TemplatesNamespace struct {

@@ -47,20 +47,20 @@ func ListGrants(ctx context.Context, clientConfig ClientConfig, params ListGrant
 	return &resp.Data, nil
 }
 
-type RevokeGrantParams struct {
+type RevokeOauthGrantParams struct {
 	OauthGrantId string
 }
 
-// RevokeGrant revokes an OAuth grant, removing the authorization associated with it. Supply the grant's ID to identify which authorization to revoke. The response includes the revocation time and reason.
+// RevokeOauthGrant revokes an OAuth grant, removing the authorization associated with it. Supply the grant's ID to identify which authorization to revoke. The response includes the revocation time and reason.
 //
 // Parameters:
 //
 //	oauthGrantId: The OAuth grant ID.
-func RevokeGrant(ctx context.Context, clientConfig ClientConfig, params RevokeGrantParams, opts ...RequestOption) (*RevokeOAuthGrantResponse, error) {
+func RevokeOauthGrant(ctx context.Context, clientConfig ClientConfig, params RevokeOauthGrantParams, opts ...RequestOption) (*RevokeOAuthGrantResponse, error) {
 	oauthGrantId := params.OauthGrantId
 
 	resp, err := DoCfg[RevokeOAuthGrantResponse](ctx, &clientConfig, "DELETE", fmt.Sprintf("/oauth/grants/%s", EncodePathSegment(oauthGrantId)), &RequestOpts{
-		OperationID: "RevokeGrant",
+		OperationID: "RevokeOauthGrant",
 		Options:     opts,
 	})
 	if err != nil {

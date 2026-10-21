@@ -240,8 +240,8 @@ func sdkMethodByName(name string) any {
 		return LogsGet
 	case "LogsList":
 		return LogsList
-	case "RevokeGrant":
-		return RevokeGrant
+	case "RevokeOauthGrant":
+		return RevokeOauthGrant
 	case "SegmentsCreate":
 		return SegmentsCreate
 	case "SegmentsGet":
